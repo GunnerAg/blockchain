@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
-#include "merkletree.h"
+#include "merkle_tree.h"
+#include "block.h"
 #include "transaction.h"
 
 MerkleTree::MerkleTree(const std::vector<Transaction> &transactions) : transactions_(transactions)

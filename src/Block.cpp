@@ -3,7 +3,7 @@
 #include <openssl/sha.h>
 
 #include "block.h"
-#include "merkletree.h"
+#include "merkle_tree.h"
 #include "transaction.h"
 
 Block::Block(const std::vector<Transaction> &transactions, const std::string &previous_hash) : transactions_(transactions), previous_hash_(previous_hash)

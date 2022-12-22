@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include "transaction.h"
 
 class Block
 {
