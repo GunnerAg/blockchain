@@ -1,45 +1,29 @@
-#pragma once
-
 #include <string>
 
 class Transaction
 {
 public:
-  // Constructs a new transaction with the given data
-  Transaction(const std::string &sender, const std::string &recipient,
-              int amount, const std::string &signature);
-
-  // Returns the transaction's sender
-  const std::string &sender() const { return sender_; }
-
-  // Returns the transaction's recipient
-  const std::string &recipient() const { return recipient_; }
-
-  // Returns the transaction's amount
-  int amount() const { return amount_; }
-
-  // Returns the transaction's signature
-  const std::string &signature() const { return signature_; }
-
-  // Serializes the transaction to a string
-  std::string Serialize() const;
-
-  // Deserializes the transaction from a string
-  static Transaction Deserialize(const std::string &data);
-
-  // Returns true if the transaction is valid, false otherwise
+  // Constructs a new transaction with the given sender, recipient, and amount.
+  Transaction(int sender, int recipient, double amount);
+  // Returns the sender of the transaction.
+  int GetSender() const;
+  // Returns the recipient of the transaction.
+  int GetRecipient() const;
+  // Returns the amount of the transaction.
+  double GetAmount() const;
+  // Returns the hash of the transaction.
+  std::string GetHash() const;
+  // Returns true if the transaction is valid, false otherwise.
   bool IsValid() const;
 
+  static constexpr size_t kMaxTransactionSize = 1024;
+
 private:
-  // The transaction's sender
-  std::string sender_;
+  // Generates a random hash for the transaction.
+  std::string GenerateRandomHash() const;
 
-  // The transaction's recipient
-  std::string recipient_;
-
-  // The transaction's amount
-  int amount_;
-
-  // The transaction's signature
-  std::string signature_;
+  int sender_;
+  int recipient_;
+  double amount_;
+  std::string hash_;
 };

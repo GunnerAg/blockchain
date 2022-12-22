@@ -1,54 +1,29 @@
-#pragma once
-
-#include <cstdint>
 #include <vector>
-
-#include "Transaction.h"
+#include <string>
 
 class Block
 {
 public:
-  // Constructs a new block with the given data and previous hash
-  Block(uint32_t index, const std::vector<Transaction> &transactions,
-        const std::string &previous_hash);
+  // Constructor for creating a new block
+  Block(const std::vector<Transaction> &transactions, const std::string &previous_hash);
 
-  // Returns the block's index
-  uint32_t index() const { return index_; }
+  // Method for calculating the block's hash
+  std::string CalculateHash() const;
 
-  // Returns the block's list of transactions
-  const std::vector<Transaction> &transactions() const { return transactions_; }
+  // Method for verifying the integrity of the block's transactions
+  bool VerifyTransactions() const;
 
-  // Returns the block's previous hash
-  const std::string &previous_hash() const { return previous_hash_; }
-
-  // Returns the block's hash
-  const std::string &hash() const { return hash_; }
-
-  // Returns the block's timestamp
-  uint64_t timestamp() const { return timestamp_; }
-
-  // Serializes the block to a string
+  // Method for serializing the block to a string
   std::string Serialize() const;
 
-  // Deserializes the block from a string
-  static Block Deserialize(const std::string &data);
+  // Method for deserializing the block from a string
+  static Block Deserialize(const std::string &str);
 
-  // Returns true if the block is valid, false otherwise
-  bool IsValid() const;
+  std::string root_hash; // Root hash of the transactions in the block
 
 private:
-  // The block's index
-  uint32_t index_;
-
-  // The block's list of transactions
-  std::vector<Transaction> transactions_;
-
-  // The block's previous hash
-  std::string previous_hash_;
-
-  // The block's hash
-  std::string hash_;
-
-  // The block's timestamp
-  uint64_t timestamp_;
+  std::vector<Transaction> transactions_; // List of transactions in the block
+  std::string previous_hash_;             // Hash of the previous block in the chain
+  std::string hash_;                      // Hash of the current block
+  int timestamp_;                         // Timestamp of when the block was created
 };

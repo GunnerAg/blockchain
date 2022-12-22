@@ -1,43 +1,64 @@
-#include "Block.h"
-#include "sha256.h"
+#include <string>
+#include <vector>
+#include <openssl/sha.h>
 
-Block::Block(uint32_t index, const std::string &previous_hash, const std::string &merkle_root,
-             uint32_t timestamp, uint32_t proof)
-    : m_index(index), m_previous_hash(previous_hash), m_merkle_root(merkle_root),
-      m_timestamp(timestamp), m_proof(proof)
+#include "block.h"
+#include "merkletree.h"
+#include "transaction.h"
+
+Block::Block(const std::vector<Transaction> &transactions, const std::string &previous_hash) : transactions_(transactions), previous_hash_(previous_hash)
 {
-  // Calculate the block hash
-  std::stringstream ss;
-  ss << index << previous_hash << merkle_root << timestamp << proof;
-  m_hash = sha256(ss.str());
+  // Use the Merkle tree to verify the integrity of the transactions
+  MerkleTree tree(transactions_);
+  if (!tree.Verify())
+  {
+    throw std::invalid_argument("Invalid transactions in the block.");
+  }
+
+  // Calculate the hash of the block
+  root_hash_ = tree.GetRootHash();
+  std::string header = previous_hash_ + root_hash_;
+  hash_ = CalculateHash(header);
 }
 
-uint32_t Block::get_index() const
+const std::string &Block::GetHash() const
 {
-  return m_index;
+  return hash_;
 }
 
-std::string Block::get_previous_hash() const
+const std::string &Block::GetPreviousHash() const
 {
-  return m_previous_hash;
+  return previous_hash_;
 }
 
-std::string Block::get_merkle_root() const
+const std::vector<Transaction> &Block::GetTransactions() const
 {
-  return m_merkle_root;
+  return transactions_;
 }
 
-uint32_t Block::get_timestamp() const
+std::string Block::CalculateHash() const
 {
-  return m_timestamp;
-}
-
-uint32_t Block::get_proof() const
-{
-  return m_proof;
-}
-
-std::string Block::get_hash() const
-{
-  return m_hash;
+  // Initialize the SHA-3 hash context
+  SHA256_CTX ctx;
+  SHA256_Init(&ctx);
+  // Update the hash with the block header
+  SHA256_Update(&ctx, &timestamp_, sizeof(timestamp_));
+  SHA256_Update(&ctx, &previous_hash_, sizeof(previous_hash_));
+  SHA256_Update(&ctx, &merkle_root_, sizeof(merkle_root_));
+  SHA256_Update(&ctx, &nonce_, sizeof(nonce_));
+  // Update the hash with the block body (transactions)
+  for (const Transaction &transaction : transactions_)
+  {
+    SHA256_Update(&ctx, transaction.GetHash().c_str(), transaction.GetHash().size());
+  }
+  // Finalize the hash
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  SHA256_Final(hash, &ctx);
+  // Convert the hash to a hexadecimal string
+  char hash_str[SHA256_DIGEST_LENGTH * 2 + 1];
+  for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+  {
+    sprintf(hash_str + i * 2, "%02x", hash[i]);
+  }
+  return std::string(hash_str);
 }
